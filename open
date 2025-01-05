@@ -1,0 +1,22 @@
+const links = document.querySelectorAll(".item a");
+let currentIndex = 0;
+
+function checkForSubmitSuccess() {
+  return document.body.innerText.includes("Submit success");
+}
+
+function clickNextLink() {
+  if (currentIndex < links.length) {
+    links[currentIndex++].click();
+    setTimeout(() => {
+      const intervalId = setInterval(() => {
+        if (checkForSubmitSuccess()) {
+          clearInterval(intervalId);
+          clickNextLink();
+        }
+      }, 1000);
+    }, 3000);
+  }
+}
+
+clickNextLink();
