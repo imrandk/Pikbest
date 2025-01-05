@@ -1,41 +1,27 @@
 (function() {
-    const style = { position: 'fixed', left: '30px', zIndex: '9999', backgroundColor: '#28a745', color: 'white', padding: '15px 30px', border: 'none', borderRadius: '20px', cursor: 'pointer', fontSize: '16px', width: '200px', textAlign: 'center' };
-
-    const createButton = (text, top, onClick) => {
-        const button = document.createElement('button');
-        button.textContent = text;
-        Object.assign(button.style, { ...style, top });
-        button.addEventListener('click', onClick);
-        document.body.appendChild(button);
+    const style = { 
+        position: 'fixed', left: '30px', zIndex: '99999', background: '#28a745', 
+        color: 'white', padding: '15px 30px', border: 'none', borderRadius: '20px', 
+        cursor: 'pointer', fontSize: '16px', width: '200px', textAlign: 'center' 
     };
 
-    const handleClick = async (selector, enterSelector, delay = 100) => {
-        try {
-            const button = event.target;
-            button.style.backgroundColor = 'white';
-            button.style.color = '#007BFF';
-            setTimeout(() => { button.style.backgroundColor = '#28a745'; button.style.color = 'white'; }, 1000);
+    const createButton = (text, top, onClick) => {
+        Object.assign(
+            Object.assign(document.body.appendChild(document.createElement('button')), {
+                textContent: text, style: { ...style, top }, onclick: onClick
+            }).style, style, { top }
+        );
+    };
 
-            const input = document.querySelector(selector);
-            if (!input) return;
-
-            input.value = await navigator.clipboard.readText();
-            input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.dispatchEvent(new Event('change', { bubbles: true }));
-
-            if (enterSelector) {
-                const enterButton = document.querySelector(enterSelector);
-                if (enterButton) enterButton.click();
-            } else {
-                setTimeout(() => {
-                    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
-                    input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', keyCode: 13, bubbles: true }));
-                    setTimeout(() => document.querySelector('.ivu-btn-primary')?.click(), delay);
-                }, delay);
-            }
-        } catch (err) {
-            console.error('Error:', err);
-        }
+    const handleClick = async (selector, enterSelector) => {
+        const button = event.target, input = document.querySelector(selector);
+        if (!input) return;
+        Object.assign(button.style, { background: 'white', color: '#007BFF' });
+        setTimeout(() => Object.assign(button.style, style), 1000);
+        input.value = await navigator.clipboard.readText();
+        ['input', 'change'].forEach(e => input.dispatchEvent(new Event(e, { bubbles: true })));
+        if (enterSelector) document.querySelector(enterSelector)?.click();
+        else ['keydown', 'keyup'].forEach(e => input.dispatchEvent(new KeyboardEvent(e, { key: 'Enter', bubbles: true })));
     };
 
     createButton('Paste Title', '120px', () => handleClick('.ivu-input-wrapper:nth-child(1) > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary'));
