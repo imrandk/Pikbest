@@ -14,7 +14,7 @@
             const button = event.target;
             button.style.backgroundColor = 'white';
             button.style.color = '#007BFF';
-            setTimeout(() => { button.style.backgroundColor = '#28a745'; button.style.color = 'white'; }, 3000);
+            setTimeout(() => { button.style.backgroundColor = '#28a745'; button.style.color = 'white'; }, 1000);
 
             const input = document.querySelector(selector);
             if (!input) return;
