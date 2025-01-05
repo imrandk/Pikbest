@@ -1,49 +1,43 @@
 (function() {
-    const btnStyle = {
-        position: 'fixed', left: '30px', zIndex: '9999', backgroundColor: '#28a745', color: 'white', padding: '15px 30px', border: 'none', borderRadius: '20px', cursor: 'pointer', fontSize: '16px', width: '200px', textAlign: 'center'
-    };
+    const style = { position: 'fixed', left: '30px', zIndex: '9999', backgroundColor: '#28a745', color: 'white', padding: '15px 30px', border: 'none', borderRadius: '20px', cursor: 'pointer', fontSize: '16px', width: '200px', textAlign: 'center' };
 
-    const createButton = (text, top, buttonAction) => {
+    const createButton = (text, top, onClick) => {
         const button = document.createElement('button');
         button.textContent = text;
-        Object.assign(button.style, {...btnStyle, top});
+        Object.assign(button.style, { ...style, top });
+        button.addEventListener('click', onClick);
         document.body.appendChild(button);
-        button.addEventListener('click', buttonAction);
-        return button;
     };
 
-    const changeButtonColor = (button) => {
-        button.style.backgroundColor = 'white';
-        button.style.color = '#007BFF';
-        setTimeout(() => {
-            button.style.backgroundColor = '#28a745';
-            button.style.color = 'white';
-        }, 3000);
-    };
-
-    const pasteClipboard = async (inputSelector, enterSelector) => {
+    const handleClick = async (selector, enterSelector, delay = 100) => {
         try {
-            const inputField = document.querySelector(inputSelector);
-            if (!inputField) return;
-            inputField.click();
-            inputField.value = await navigator.clipboard.readText();
-            inputField.dispatchEvent(new Event('input', {bubbles: true}));
-            inputField.dispatchEvent(new Event('change', {bubbles: true}));
+            const button = event.target;
+            button.style.backgroundColor = 'white';
+            button.style.color = '#007BFF';
+            setTimeout(() => { button.style.backgroundColor = '#28a745'; button.style.color = 'white'; }, 3000);
 
-            const enterButton = document.querySelector(enterSelector);
-            enterButton?.click();
+            const input = document.querySelector(selector);
+            if (!input) return;
+
+            input.value = await navigator.clipboard.readText();
+            input.dispatchEvent(new Event('input', { bubbles: true }));
+            input.dispatchEvent(new Event('change', { bubbles: true }));
+
+            if (enterSelector) {
+                const enterButton = document.querySelector(enterSelector);
+                if (enterButton) enterButton.click();
+            } else {
+                setTimeout(() => {
+                    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
+                    input.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', keyCode: 13, bubbles: true }));
+                    setTimeout(() => document.querySelector('.ivu-btn-primary')?.click(), delay);
+                }, delay);
+            }
         } catch (err) {
             console.error('Error:', err);
         }
     };
 
-    createButton('Paste Title', '120px', async () => {
-        changeButtonColor(event.target);
-        await pasteClipboard('.ivu-input-wrapper:nth-child(1) > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary');
-    });
-
-    createButton('Paste Keyword', '180px', async () => {
-        changeButtonColor(event.target);
-        await pasteClipboard('.ivu-input-wrapper:nth-child(2) > .ivu-input', '.ivu-btn-primary');
-    });
+    createButton('Paste Title', '120px', () => handleClick('.ivu-input-wrapper:nth-child(1) > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary'));
+    createButton('Paste Keyword', '180px', () => handleClick('.ivu-input-wrapper:nth-child(2) > .ivu-input'));
 })();
