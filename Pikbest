@@ -9,5 +9,5 @@
         } catch (err) { console.error('Error:', err); }
     };
     b('Paste Title', '120px', () => h('.ivu-input-wrapper:nth-child(1) > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary'));
-    b('Paste Keyword', '180px', () => h('.ivu-input-wrapper:nth-child(2) > .ivu-input'));
+    b('Paste Keyword', '720px', () => h('.ivu-input-wrapper:nth-child(2) > .ivu-input'));
 })();
