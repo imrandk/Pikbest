@@ -2,26 +2,32 @@
     const createButton = (text, top, callback) => {
         const button = document.createElement('button');
         button.textContent = text;
-        Object.assign(button.style, {
-            position: 'fixed', top, left: '500px', zIndex: '9999', padding: '10px 10px',
-            border: 'none', borderRadius: '20px', cursor: 'pointer', backgroundColor: 'transparent', color: 'green'
-        });
+        Object.assign(button.style, { position: 'fixed', top, left: '500px', zIndex: '9999', padding: '10px', border: 'none', borderRadius: '20px', cursor: 'pointer', backgroundColor: 'transparent', color: 'green' });
         document.body.appendChild(button);
         button.addEventListener('click', callback);
     };
 
-    const links = document.querySelectorAll(".item a");
-    let currentIndex = 0;
+    const items = Array.from(document.querySelectorAll(".item"));
+    let currentIndex = 0, intervalId = null;
+
+    const extractNumber = item => {
+        const match = item.querySelector('.name').textContent.match(/\((\d+)\)/);
+        return match ? parseInt(match[1], 10) : null;
+    };
+
+    items.sort((a, b) => extractNumber(a) - extractNumber(b));
 
     const checkForSubmitSuccess = () => document.body.innerText.includes("Submit success");
 
     const clickNextLink = () => {
-        if (currentIndex < links.length) {
-            links[currentIndex++].click();
+        if (currentIndex < items.length) {
+            items[currentIndex].querySelector('a').click();
             setTimeout(() => {
-                const intervalId = setInterval(() => {
+                if (intervalId) clearInterval(intervalId);
+                intervalId = setInterval(() => {
                     if (checkForSubmitSuccess()) {
                         clearInterval(intervalId);
+                        currentIndex++;
                         clickNextLink();
                     }
                 }, 1000);
@@ -30,22 +36,12 @@
     };
 
     createButton('Skip Me', '350px', () => {
-        if (currentIndex < links.length) {
-            const nextIndex = currentIndex;  // Save current index before incrementing
+        if (currentIndex < items.length) {
             currentIndex++;
-            if (nextIndex < links.length) {
-                links[nextIndex].click();
-                setTimeout(() => {
-                    const intervalId = setInterval(() => {
-                        if (checkForSubmitSuccess()) {
-                            clearInterval(intervalId);
-                            clickNextLink();
-                        }
-                    }, 1000);
-                }, 3000);
-            }
+            if (intervalId) clearInterval(intervalId);
+            clickNextLink();
         }
     });
 
-    clickNextLink();
+    if (items.length) clickNextLink();
 })();
