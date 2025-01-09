@@ -3,7 +3,7 @@
         const button = document.createElement('button');
         button.textContent = text;
         Object.assign(button.style, {
-            position: 'fixed', top, left: '150px', zIndex: '9999', padding: '10px 10px',
+            position: 'fixed', top, left: '500px', zIndex: '9999', padding: '10px 10px',
             border: 'none', borderRadius: '20px', cursor: 'pointer', backgroundColor: 'transparent', color: 'green'
         });
         document.body.appendChild(button);
@@ -29,10 +29,21 @@
         }
     };
 
-    createButton('Skip Me', '103px', () => {
+    createButton('Skip Me', '350px', () => {
         if (currentIndex < links.length) {
+            const nextIndex = currentIndex;  // Save current index before incrementing
             currentIndex++;
-            clickNextLink();
+            if (nextIndex < links.length) {
+                links[nextIndex].click();
+                setTimeout(() => {
+                    const intervalId = setInterval(() => {
+                        if (checkForSubmitSuccess()) {
+                            clearInterval(intervalId);
+                            clickNextLink();
+                        }
+                    }, 1000);
+                }, 3000);
+            }
         }
     });
 
