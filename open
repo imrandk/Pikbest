@@ -1,22 +1,37 @@
-const links = document.querySelectorAll(".item a");
-let currentIndex = 0;
+(function () {
+    const createButton = (text, top, callback) => {
+        const button = document.createElement('button');
+        button.textContent = text;
+        Object.assign(button.style, {
+            position: 'fixed', top, left: '150px', zIndex: '9999', padding: '10px 10px',
+            border: 'none', borderRadius: '20px', cursor: 'pointer', backgroundColor: 'transparent',
+            color: 'green'
+        });
+        document.body.appendChild(button);
+        button.addEventListener('click', () => callback && callback());
+    };
 
-function checkForSubmitSuccess() {
-  return document.body.innerText.includes("Submit success");
-}
+    const links = document.querySelectorAll(".item a");
+    let currentIndex = 0, isRunning = true, intervalId = null;
 
-function clickNextLink() {
-  if (currentIndex < links.length) {
-    links[currentIndex++].click();
-    setTimeout(() => {
-      const intervalId = setInterval(() => {
-        if (checkForSubmitSuccess()) {
-          clearInterval(intervalId);
-          clickNextLink();
+    const checkForSubmitSuccess = () => document.body.innerText.includes("Submit success");
+    const clickNextLink = () => {
+        if (!isRunning) return;
+        if (currentIndex < links.length) {
+            links[currentIndex++].click();
+            intervalId = setInterval(() => {
+                if (checkForSubmitSuccess()) {
+                    clearInterval(intervalId);
+                    clickNextLink();
+                }
+            }, 1000);
         }
-      }, 1000);
-    }, 3000);
-  }
-}
+    };
 
-clickNextLink();
+    createButton('Skip Me', '103px', () => {
+        isRunning = true;
+        clickNextLink();
+    });
+
+    if (links.length > 0) clickNextLink();
+})();
