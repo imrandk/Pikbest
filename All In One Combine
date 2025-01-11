@@ -1,0 +1,74 @@
+(() => {
+    const createBtn = (text, top, f, style) => {
+        const btn = document.createElement('button');
+        btn.textContent = text;
+        Object.assign(btn.style, style, { top });
+        btn.addEventListener('click', f);
+        document.body.appendChild(btn);
+    };
+
+    const pasteAndTrigger = async (q, e, d = 100) => {
+        try {
+            const t = event.target;
+            t.style.backgroundColor = 'white';
+            t.style.color = '#007BFF';
+            setTimeout(() => { t.style.backgroundColor = '#28a745'; t.style.color = 'white'; }, 1000);
+
+            const el = document.querySelector(q);
+            if (!el) return;
+            el.value = await navigator.clipboard.readText();
+            el.dispatchEvent(new Event('input', { bubbles: true }));
+            el.dispatchEvent(new Event('change', { bubbles: true }));
+
+            if (e) document.querySelector(e)?.click();
+            else setTimeout(() => {
+                el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
+                el.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', keyCode: 13, bubbles: true }));
+                setTimeout(() => document.querySelector('.ivu-btn-primary')?.click(), d);
+            }, d);
+        } catch (err) { console.error('Error:', err); }
+    };
+
+    const btnStyle = {
+        position: 'fixed', left: '410px', zIndex: '99999', backgroundColor: '#28a745', color: 'white',
+        padding: '50px 30px', border: 'none', borderRadius: '20px', cursor: 'pointer', fontSize: '16px',
+        width: '200px', textAlign: 'center', boxShadow: '0 2px 10px rgba(0, 0, 0, 0.2)'
+    };
+
+    createBtn('Paste Title', '120px', () => pasteAndTrigger('.ivu-input-wrapper:nth-child(1) > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary'), btnStyle);
+    createBtn('Paste Keyword', '420px', () => pasteAndTrigger('.ivu-input-wrapper:nth-child(2) > .ivu-input'), btnStyle);
+
+    const items = Array.from(document.querySelectorAll(".item")).sort((a, b) => {
+        const numA = a.querySelector('.name').textContent.match(/\((\d+)\)/)?.[1] || 0;
+        const numB = b.querySelector('.name').textContent.match(/\((\d+)\)/)?.[1] || 0;
+        return numA - numB;
+    });
+
+    let idx = 0, intId = null;
+
+    const clickNext = () => {
+        if (idx < items.length) {
+            items[idx].querySelector('a').click();
+            setTimeout(() => {
+                if (intId) clearInterval(intId);
+                intId = setInterval(() => {
+                    if (document.body.innerText.includes("Submit success")) {
+                        clearInterval(intId);
+                        idx++;
+                        clickNext();
+                    }
+                }, 1000);
+            }, 3000);
+        }
+    };
+
+    createBtn('Skip Me', '350px', () => {
+        if (idx < items.length) {
+            idx++;
+            if (intId) clearInterval(intId);
+            clickNext();
+        }
+    }, { position: 'fixed', left: '500px', zIndex: '9999', padding: '10px', border: 'none', borderRadius: '20px', cursor: 'pointer', backgroundColor: 'transparent', color: 'green' });
+
+    if (items.length) clickNext();
+})();
