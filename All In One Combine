@@ -24,16 +24,7 @@
             else setTimeout(() => {
                 el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', keyCode: 13, bubbles: true }));
                 el.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', keyCode: 13, bubbles: true }));
-                setTimeout(() => {
-                    document.querySelector('.ivu-btn-primary')?.click();
-                    // Check for "The title and keywords" after clicking the button
-                    setTimeout(() => {
-                        if (document.body.innerText.includes("The title and keywords")) {
-                            // Re-open the same file if the text is found
-                            items[idx].querySelector('a').click();
-                        }
-                    }, 1000); // Wait 1 second to check for the text
-                }, d);
+                setTimeout(() => document.querySelector('.ivu-btn-primary')?.click(), d);
             }, d);
         } catch (err) { console.error('Error:', err); }
     };
