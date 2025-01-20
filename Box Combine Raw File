@@ -2,8 +2,8 @@
     // Create the draggable and resizable box
     let box = document.createElement("div");
     box.style.position = "fixed";
-    box.style.top = "50px"; // Default top position
-    box.style.left = "50px"; // Default left position
+    box.style.top = "50px";
+    box.style.left = "50px";
     box.style.width = "300px";
     box.style.height = "250px"; // Increased height to accommodate buttons
     box.style.background = "#f0f0f0";
@@ -68,16 +68,8 @@
 
     document.addEventListener("mousemove", (e) => {
         if (isDragging) {
-            // Ensure the box stays within the viewport
-            const newLeft = e.clientX - offsetX;
-            const newTop = e.clientY - offsetY;
-
-            // Prevent the box from going off-screen
-            const maxLeft = window.innerWidth - box.offsetWidth;
-            const maxTop = window.innerHeight - box.offsetHeight;
-
-            box.style.left = Math.min(Math.max(newLeft, 0), maxLeft) + "px";
-            box.style.top = Math.min(Math.max(newTop, 0), maxTop) + "px";
+            box.style.left = e.clientX - offsetX + "px";
+            box.style.top = e.clientY - offsetY + "px";
         }
     });
 
