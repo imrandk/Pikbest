@@ -19,7 +19,7 @@
 
     // Close button
     let closeButton = document.createElement("span");
-    closeButton.innerHTML = "&times;";
+    closeButton.innerHTML = "×";
     closeButton.style.position = "absolute";
     closeButton.style.top = "5px";
     closeButton.style.right = "5px";
@@ -188,7 +188,9 @@
         if (idx < items.length) {
             idx++;
             if (intId) clearInterval(intId);
-            clickNext();
+            setTimeout(() => { // Delay opening the next file by 1 second
+                clickNext();
+            }, 1000);
         }
     }, {
         backgroundColor: 'transparent',
@@ -231,7 +233,7 @@
                 if (intId) clearInterval(intId);
                 intId = setInterval(() => {
                     // Check if the error message is displayed
-                    if (document.body.innerText.includes("title and keywords cannot be the same")) {
+                    if (document.body.innerText.includes("title and keywords cannot be the same") || document.body.innerText.includes("Please fill in the information first")) {
                         // Automatically click the skip button
                         skipBtn.click();
                         return;
