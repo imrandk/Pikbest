@@ -248,12 +248,12 @@
             // Automatically click title button after 2 seconds
             setTimeout(() => {
                 pasteAndTrigger('.ivu-input-wrapper:nth-child(1) > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary', 'title', 100, { target: document.querySelector('.ivu-input-wrapper:nth-child(1) > .ivu-input') });
-            }, 2000);
+            }, 1000);
 
             // Automatically click tag button after 3 seconds
             setTimeout(() => {
                 pasteAndTrigger('.ivu-input-wrapper:nth-child(2) > .ivu-input', null, 'tag', 100, { target: document.querySelector('.ivu-input-wrapper:nth-child(2) > .ivu-input') });
-            }, 1000);
+            }, 2000);
         }
     };
 })();
