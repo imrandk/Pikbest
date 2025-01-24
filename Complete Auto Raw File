@@ -5,8 +5,8 @@
     box.style.top = "50px";
     box.style.left = "50px";
     box.style.width = "300px";
-    box.style.height = "150px"; // Adjusted height after removing buttons
-    box.style.background = "#f0f0f0"; // Background color of the box
+    box.style.height = "150px"; 
+    box.style.background = "#f0f0f0";
     box.style.border = "2px solid #333";
     box.style.padding = "10px";
     box.style.boxShadow = "4px 4px 15px rgba(0, 0, 0, 0.3)";
@@ -39,7 +39,7 @@
     // Textarea
     let textArea = document.createElement("textarea");
     textArea.style.width = "100%";
-    textArea.style.height = "80px"; // Adjusted height after removing buttons
+    textArea.style.height = "80px"; 
     textArea.style.border = "none";
     textArea.style.outline = "none";
     textArea.style.resize = "none";
@@ -49,11 +49,8 @@
     textArea.style.fontSize = "14px";
     textArea.placeholder = "এখানে লিখুন...";
 
-    // Add close button and textarea to the box
     box.appendChild(closeButton);
     box.appendChild(textArea);
-
-    // Add box to the document body
     document.body.appendChild(box);
 
     // Dragging functionality
@@ -77,48 +74,7 @@
         isDragging = false;
     });
 
-    // Resize functionality
-    let resizeHandle = document.createElement("div");
-    resizeHandle.style.width = "15px";
-    resizeHandle.style.height = "15px";
-    resizeHandle.style.background = "#333";
-    resizeHandle.style.position = "absolute";
-    resizeHandle.style.bottom = "0";
-    resizeHandle.style.right = "0";
-    resizeHandle.style.cursor = "se-resize";
-    resizeHandle.style.borderRadius = "4px";
-
-    box.appendChild(resizeHandle);
-
-    let isResizing = false, startX, startY, startWidth, startHeight;
-
-    resizeHandle.addEventListener("mousedown", (e) => {
-        isResizing = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        startWidth = box.offsetWidth;
-        startHeight = box.offsetHeight;
-        document.addEventListener("mousemove", resizeBox);
-        document.addEventListener("mouseup", stopResizing);
-        e.preventDefault();
-    });
-
-    function resizeBox(e) {
-        if (isResizing) {
-            let newWidth = startWidth + (e.clientX - startX);
-            let newHeight = startHeight + (e.clientY - startY);
-            box.style.width = newWidth + "px";
-            box.style.height = newHeight + "px";
-        }
-    }
-
-    function stopResizing() {
-        isResizing = false;
-        document.removeEventListener("mousemove", resizeBox);
-        document.removeEventListener("mouseup", stopResizing);
-    }
-
-    // Function to parse the text from the textarea based on the current file name
+    // Function to extract correct text based on exact file name match
     const parseText = (type, currentFileName) => {
         const text = textArea.value;
         const lines = text.split('\n');
@@ -127,13 +83,8 @@
 
         lines.forEach(line => {
             if (line.startsWith('File Name:')) {
-                // Extract the file name and check if it matches the current file
                 const fileName = line.replace('File Name:', '').trim();
-                if (fileName === currentFileName) {
-                    isCurrentFile = true;
-                } else {
-                    isCurrentFile = false;
-                }
+                isCurrentFile = (fileName === currentFileName); // Exact match check
             } else if (isCurrentFile) {
                 if (type === 'title' && line.startsWith('Title:')) {
                     result = line.replace('Title:', '').trim();
@@ -147,18 +98,16 @@
     };
 
     // Function to paste and trigger events
-    const pasteAndTrigger = async (q, e, type, d = 100, event) => { // Add event as a parameter
+    const pasteAndTrigger = async (q, e, type, d = 100, event) => {
         try {
-            const t = event?.target; // Use optional chaining to avoid errors
+            const t = event?.target;
             if (t) {
-                t.style.backgroundColor = 'transparent'; // Set background to transparent
-                t.style.color = 'inherit'; // Reset color to default
+                t.style.backgroundColor = 'transparent';
+                t.style.color = 'inherit';
             }
 
-            // Get the current file name from the opened item
             const currentItem = items[idx];
             const currentFileName = currentItem.querySelector('.name').textContent.trim();
-
             const el = document.querySelector(q);
             if (!el) return;
             el.value = parseText(type, currentFileName);
@@ -174,25 +123,58 @@
         } catch (err) { console.error('Error:', err); }
     };
 
-    // Function to create buttons
-    const createBtn = (text, onClick, style) => {
-        const btn = document.createElement('button');
-        btn.textContent = text;
-        Object.assign(btn.style, style);
-        btn.addEventListener('click', onClick);
-        return btn;
-    };
+    // Auto-navigation logic
+    const items = Array.from(document.querySelectorAll(".item")).sort((a, b) => {
+        const numA = a.querySelector('.name').textContent.match(/\((\d+)\)/)?.[1] || 0;
+        const numB = b.querySelector('.name').textContent.match(/\((\d+)\)/)?.[1] || 0;
+        return numA - numB;
+    });
 
-    // Add skip button to the box
-    const skipBtn = createBtn('Skip Me', () => {
-        if (idx < items.length) {
-            idx++;
-            if (intId) clearInterval(intId);
-            setTimeout(() => { // Delay opening the next file by 1 second
+    let idx = 0, intId = null;
+
+    // Function to start process after text is entered
+    textArea.addEventListener('input', () => {
+        if (textArea.value.trim() !== '' && idx === 0) {
+            setTimeout(() => {
                 clickNext();
             }, 1000);
         }
-    }, {
+    });
+
+    const clickNext = () => {
+        if (idx < items.length) {
+            items[idx].querySelector('a').click();
+            setTimeout(() => {
+                if (intId) clearInterval(intId);
+                intId = setInterval(() => {
+                    if (document.body.innerText.includes("title and keywords cannot be the same") || document.body.innerText.includes("Please fill in the information first")) {
+                        skipBtn.click();
+                        return;
+                    }
+                    if (document.body.innerText.includes("Submit success")) {
+                        clearInterval(intId);
+                        idx++;
+                        clickNext();
+                    }
+                }, 1000);
+            }, 1000);
+
+            // Auto-fill title
+            setTimeout(() => {
+                pasteAndTrigger('.ivu-input-wrapper:nth-child(1) > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary', 'title', 100, { target: document.querySelector('.ivu-input-wrapper:nth-child(1) > .ivu-input') });
+            }, 1000);
+
+            // Auto-fill tag
+            setTimeout(() => {
+                pasteAndTrigger('.ivu-input-wrapper:nth-child(2) > .ivu-input', null, 'tag', 100, { target: document.querySelector('.ivu-input-wrapper:nth-child(2) > .ivu-input') });
+            }, 1000);
+        }
+    };
+
+    // Skip button
+    const skipBtn = document.createElement('button');
+    skipBtn.textContent = "Skip Me";
+    Object.assign(skipBtn.style, {
         backgroundColor: 'transparent',
         color: 'green',
         border: '1px solid green',
@@ -204,58 +186,12 @@
         width: '100%',
         textAlign: 'center'
     });
-
-    // Add skip button to the box
-    box.appendChild(skipBtn);
-
-    // Auto-navigation logic
-    const items = Array.from(document.querySelectorAll(".item")).sort((a, b) => {
-        const numA = a.querySelector('.name').textContent.match(/\((\d+)\)/)?.[1] || 0;
-        const numB = b.querySelector('.name').textContent.match(/\((\d+)\)/)?.[1] || 0;
-        return numA - numB;
-    });
-
-    let idx = 0, intId = null;
-
-    // Function to start the process after text is entered
-    textArea.addEventListener('input', () => {
-        if (textArea.value.trim() !== '' && idx === 0) {
-            setTimeout(() => {
-                clickNext();
-            }, 1000); // Wait for 1 second after text is entered
-        }
-    });
-
-    const clickNext = () => {
+    skipBtn.onclick = () => {
         if (idx < items.length) {
-            items[idx].querySelector('a').click();
-            setTimeout(() => {
-                if (intId) clearInterval(intId);
-                intId = setInterval(() => {
-                    // Check if the error message is displayed
-                    if (document.body.innerText.includes("title and keywords cannot be the same") || document.body.innerText.includes("Please fill in the information first")) {
-                        // Automatically click the skip button
-                        skipBtn.click();
-                        return;
-                    }
-
-                    if (document.body.innerText.includes("Submit success")) {
-                        clearInterval(intId);
-                        idx++;
-                        clickNext();
-                    }
-                }, 1000);
-            }, 1000);
-
-            // Automatically click title button after 1 seconds
-            setTimeout(() => {
-                pasteAndTrigger('.ivu-input-wrapper:nth-child(1) > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary', 'title', 100, { target: document.querySelector('.ivu-input-wrapper:nth-child(1) > .ivu-input') });
-            }, 1000);
-
-            // Automatically click tag button after 2 seconds
-            setTimeout(() => {
-                pasteAndTrigger('.ivu-input-wrapper:nth-child(2) > .ivu-input', null, 'tag', 100, { target: document.querySelector('.ivu-input-wrapper:nth-child(2) > .ivu-input') });
-            }, 2000);
+            idx++;
+            if (intId) clearInterval(intId);
+            setTimeout(() => clickNext(), 1000);
         }
     };
+    box.appendChild(skipBtn);
 })();
