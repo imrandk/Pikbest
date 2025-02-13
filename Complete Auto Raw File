@@ -161,7 +161,7 @@
 
             // Auto-fill title
             setTimeout(() => {
-                pasteAndTrigger('.ivu-input-wrapper:nth-child(1) > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary', 'title', 100, { target: document.querySelector('.ivu-input-wrapper:nth-child(1) > .ivu-input') });
+                pasteAndTrigger('.ivu-form-item-content > .ivu-input-type-text > .ivu-input', '.ivu-input-wrapper:nth-child(2) > .ivu-btn-primary', 'title', 100, { target: document.querySelector('.ivu-input-wrapper:nth-child(1) > .ivu-input') });
             }, 1000);
 
             // Auto-fill tag
